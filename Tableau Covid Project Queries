@@ -1,0 +1,42 @@
+/*
+Queries used for Tableau Covid Project
+*/
+
+
+
+-- Query used for Global Numbers graph
+
+Select SUM(new_cases) as total_cases, SUM(new_deaths) as total_deaths, SUM(new_deaths)/SUM(New_Cases)*100 as DeathPercentage
+From `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+where continent is not null 
+order by 1,2
+
+
+
+-- Query used for Total Deaths Per Continent Graph
+
+Select location, SUM(new_deaths) as TotalDeathCount
+From `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+Where continent is null 
+and location not in ('World', 'European Union', 'International')
+Group by location
+order by TotalDeathCount desc
+
+
+
+-- Query used for Percentage of Population Infected Per Country visualization 
+
+Select Location, Population, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+From `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+Group by Location, Population
+order by PercentPopulationInfected desc
+
+
+
+-- Query used for Percentage of Population Infected (Future Forecast Included) visualization
+
+Select Location, Population,date, MAX(total_cases) as HighestInfectionCount,  Max((total_cases/population))*100 as PercentPopulationInfected
+From `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+--Where location like '%states%'
+Group by Location, Population, date
+order by PercentPopulationInfected desc
