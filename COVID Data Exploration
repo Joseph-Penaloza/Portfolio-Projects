@@ -1,0 +1,153 @@
+/*
+Exploring Covid 19 Data on BigQuery
+*/
+
+Select *
+FROM
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+Where
+     continent is not null
+ORDER BY
+     3,4
+
+
+-- Selecting the data that I would start with
+
+SELECT *
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+WHERE 
+    continent is not null 
+ORDER BY 
+    1,2
+
+
+
+-- Total Cases vs Total Deaths 
+-- Demonstrating the likelihood of dying if you contract Covid 19 in your country 
+
+SELECT 
+    location, date, total_cases, new_cases, total_deaths, population
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+ORDER BY 
+    1,2
+
+
+
+-- Looking at Total Cases vs Total Deaths
+-- Shows likelihood of dying if you contract covid in your country 
+
+SELECT 
+    location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 AS DeathPercentage
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+ORDER BY 
+    1,2
+
+
+
+-- Looking at the Total Cases vs Population
+-- Shows what percentage of population is infected with Covid
+
+SELECT 
+    location, date, population, total_cases,  (total_cases/population)*100 AS Percentage_of_Population_Infected
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+ORDER BY 
+    1,2
+
+
+
+-- Finding which contries has the highest infection rate compared to population
+
+SELECT 
+    location, population, MAX(total_cases) AS Highest_Infection_Count, MAX((total_cases/population))*100 AS Percentage_of_Population_Infected
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+WHERE 
+    continent is not null 
+GROUP BY 
+    location, population
+ORDER BY 
+    Percentage_of_Population_Infected DESC 
+    
+    
+
+-- Showing the countries with the highest death count per population
+
+SELECT 
+    location, MAX(total_deaths) AS Total_Death_Count
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+WHERE 
+    continent is not null 
+GROUP BY 
+    location
+ORDER BY 
+    Total_Death_Count DESC 
+
+
+
+-- Breaking things down by continent 
+-- Showing continents with the highest death count per population
+
+SELECT 
+    continent, MAX(total_deaths) AS Total_Death_Count
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+WHERE 
+    continent is not null 
+GROUP BY 
+    continent
+ORDER BY 
+    Total_Death_Count DESC 
+
+
+
+-- Global numbers
+
+SELECT 
+    SUM(new_cases) AS total_cases, SUM(new_deaths) AS total_deaths, SUM(new_deaths)/SUM(new_cases)*100 AS Death_Percentage
+FROM 
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths`
+WHERE 
+    continent is not null
+ORDER BY 
+    1,2
+
+
+
+-- Looking at total population vs vaccinations
+-- Shows the percentage of population that has recieved at least one Covid vaccine 
+
+SELECT 
+    dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(vac.new_vaccinations) OVER (partition by dea.location ORDER BY dea.location, dea.date) AS Rolling_People_Vaccinated
+FROM   
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths` AS dea
+JOIN  
+    `wikipedia-project-315614.PortfolioProject.CovidVaccinations` AS vac
+    ON dea.location  = vac.location
+    and dea.date = vac.date
+WHERE 
+    dea.continent is not null 
+ORDER BY 
+    2,3
+
+
+
+-- Using CTE to perform a calculation on Partition By in previous query
+
+With PopvsVac AS (
+Select dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
+, SUM(vac.new_vaccinations) OVER (partition by dea.location ORDER BY dea.location, dea.date) AS Rolling_People_Vaccinated
+FROM   
+    `wikipedia-project-315614.PortfolioProject.CovidDeaths` AS dea
+JOIN  
+    `wikipedia-project-315614.PortfolioProject.CovidVaccinations` AS vac
+    ON dea.location  = vac.location
+    and dea.date = vac.date
+where dea.continent is not null 
+)
+Select *, (Rolling_People_Vaccinated/Population)*100 AS Percentage_of_Population_Vaccinated
+From PopvsVac
