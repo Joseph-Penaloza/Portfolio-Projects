@@ -1,0 +1,61 @@
+/*
+A summary of Manchester City's 2020/21 Season 
+*/
+
+
+
+-- Peviewing all the data
+
+SELECT *
+FROM 
+    `portfolioproject-320514.Projects.Mancity2020`
+
+
+
+-- Seeing how the season ended (2020-2021 Results graph)
+
+SELECT 
+    Result,
+    COUNT(*) AS Total
+FROM 
+    `portfolioproject-320514.Projects.Mancity2020`
+GROUP BY 
+Result
+
+
+
+-- This query isn't included in the graphs. While I was over-complicating the first query above, I used the CASE statement correctly unknowingly.  
+
+SELECT Result,
+    count(*) AS total,
+    case when result = 'W' THEN 'Wins'
+    when result= 'D' THEN 'Draws'
+    when result= 'L' THEN 'Loses' 
+    END AS Results_1
+FROM `portfolioproject-320514.Projects.Mancity2020`
+GROUP BY Result
+
+
+
+--- Comparing Total goals vs total goals against for 2020/2021 (Goals for / Goals Against Graph)
+
+select 
+    SUM(GF) AS Total_goals_for, SUM(GA) AS Total_goals_against
+FROM 
+    `portfolioproject-320514.Projects.Mancity2020`
+
+
+
+-- Results throughout the season (Trophy Graph)
+
+SELECT
+    Date,
+    Round,
+    Opponent,
+    Venue, 
+    Result,
+    CONCAT(GF, '-', GA) AS Score,
+FROM 
+    `portfolioproject-320514.Projects.Mancity2020`
+ORDER BY 
+    Date
