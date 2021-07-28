@@ -46,7 +46,7 @@ FROM
 
 
 
--- Results throughout the season (Trophy Graph)
+-- Results throughout the season (Trophy Image)
 
 SELECT
     Date,
